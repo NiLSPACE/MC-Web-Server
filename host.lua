@@ -99,13 +99,15 @@ local LinkCallbacks =
 			MinPos = Clamp(Content:find("??>", MaxPos), 0, Content:len())
 			MaxPos = Content:find("<??lua", MinPos)
 			
-			-- Execute the next lua code
-			local Success, Err = coroutine.resume(LuaProgram, Client, a_TCPLink)
-			if (not Success) then
-				a_TCPLink:Send(ComposeHTMLError(Err, LuaProgram))
-				break
+			-- Check if the code already stopped. This can happen because of an error in the code or the code simply returned.
+			if (coroutine.status(LuaProgram) ~= 'dead') then
+				-- Execute the next lua code
+				local Success, Err = coroutine.resume(LuaProgram, Client, a_TCPLink)
+				if (not Success) then
+					a_TCPLink:Send(ComposeHTMLError(Err, LuaProgram))
+					break
+				end
 			end
-
 		end
 		
 		-- Send the remaining text
