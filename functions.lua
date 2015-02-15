@@ -92,6 +92,7 @@ function ComposeHTMLError(a_Err, a_Thread)
 				end
 			)
 			
+			line = line:strip()
 			line = line:ucfirst()
 			stacks = '\n\t<td bgcolor="#EEEEEC" border="1">' .. ErrPos .. '</td></tr>' .. stacks
 			stacks = '\n\t<td bgcolor="#EEEEEC" border="1">' .. line .. '</td>' .. stacks
