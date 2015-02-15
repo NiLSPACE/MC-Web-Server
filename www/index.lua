@@ -1,7 +1,7 @@
 <?lua
 local Client, Link = ...
 
-Client:RegenerateSessionID()
+Client:StartSession()
 Client:Header("Location: index.php")
 local Message = ""
 
@@ -59,7 +59,7 @@ end
 <?lua
 do -- Do - end isn't needed, but it makes it easier to notice where small bits of lua code are.
 	Link:Send(Form)
-	T)
+	T()
 end
 ?>
 	</form>

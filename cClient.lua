@@ -47,23 +47,9 @@ function cClient(a_Header, a_TCPLink)
 	end
 	
 	
-	self.SESSION = {}
-	
-	-- Find a session
-	if (self.HEADER['Cookie'] ~= nil) then
-		local Cookies = StringSplit(self.HEADER['Cookie'], " ")
-		for I, Val in ipairs(Cookies) do
-			local CookieInfo = StringSplit(Val, "=")
-			if (CookieInfo[1] == "PHPSESSID") then
-				m_SessionID = CookieInfo[2]
-				self.SESSION = g_Sessions[m_SessionID] or {}
-				g_Sessions[CookieInfo[2]] = self.SESSION
-			end
-		end
-	end
-	
-	self.POST = {}
-	self.GET  = {}
+	self.SESSION = {}	
+	self.POST    = {}
+	self.GET     = {}
 	
 	-- Fill the GET or POST tables depending on the request method
 	if (self.RequestMethod == "GET") then
@@ -88,6 +74,22 @@ function cClient(a_Header, a_TCPLink)
 	
 	function self:Header(a_Str)
 		a_TCPLink:Send(a_Str .. "\n")
+	end
+	
+	function self:StartSession()
+		if (self.HEADER['Cookie'] ~= nil) then
+			local Cookies = StringSplit(self.HEADER['Cookie'], " ")
+			for I, Val in ipairs(Cookies) do
+				local CookieInfo = StringSplit(Val, "=")
+				if (CookieInfo[1] == "PHPSESSID") then
+					m_SessionID = CookieInfo[2]
+					self.SESSION = g_Sessions[m_SessionID] or {}
+					g_Sessions[CookieInfo[2]] = self.SESSION
+				end
+			end
+		else
+			self:RegenerateSessionID()
+		end
 	end
 	
 	function self:RegenerateSessionID()
