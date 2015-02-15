@@ -63,13 +63,22 @@ local LinkCallbacks =
 		local Content = File:read("*all")
 		File:close()
 		
+		local LuaCode = Content
+		local Patterns = {"%?>.-<%?lua", "%?>.-$", "^.-<%?lua"} -- Patterns used to comment out html code
+		
 		-- Find all the Lua code pieces and separate them with a coroutine.yield function.
-		local LuaCode = ""
+		for Idx, pattern in ipairs(Patterns) do
+			LuaCode = LuaCode:gsub(pattern,
+				function (a_Str)
+					a_Str = a_Str:sub(3, -6)
+					return ' coroutine.yield() --[[' .. a_Str .. ' ]]'
+				end
+			)
+		end
+		
 		Content = Content:gsub("<??lua.-???>", 
 			function(a_Str)
 				a_Str = a_Str:sub(6, -3)
-				LuaCode = LuaCode .. a_Str .. "\n coroutine.yield()"
-				
 				return ("<?lua" .. '' .. "?> ")
 			end
 		)
@@ -85,6 +94,7 @@ local LinkCallbacks =
 		end
 		
 		LuaProgram = coroutine.create(LuaProgram)
+		coroutine.resume(LuaProgram, Client, a_TCPLink)
 		
 		local MinPos = 0
 		local MaxPos = Content:find("<??lua")

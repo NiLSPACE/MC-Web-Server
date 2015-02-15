@@ -28,8 +28,13 @@ if (Client.RequestMethod == "POST") then
 end
 
 -- Function to test the error handling
-function T()
+function R()
 	return nil * 5
+end
+
+-- Function to test the error handling
+function T()
+	R()
 end
 
 

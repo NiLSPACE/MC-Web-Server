@@ -35,30 +35,55 @@ end
 
 
 function ComposeHTMLError(a_Err, a_Thread)
-	local res = '\n<table border="1" >\n\t<tr><td colspan="2" style="padding: 2px; background-color: #DF0101; border: 1px solid black;">'
-	a_Err = a_Err:gsub("%[.-%]", function(a_Str) return '' end):gsub(":%d+: ", "")
+	local res = '\n<table border="1" >\n\t<tr><td colspan="3" style="padding: 2px; background-color: #DF0101; border: 1px solid black;">'
+	a_Err = a_Err:gsub("%[.+%]", "")
+	local ErrPos = 0
+	
+	a_Err = a_Err:gsub(":.+%: ", 
+		function(a_Str)
+			ErrPos = a_Str:sub(2, -3)
+			return ""
+		end
+	)
+	
+	a_Err = a_Err .. " at line " .. ErrPos
 	a_Err = a_Err:ucfirst()
 	
 	res = res .. a_Err .. "</td></tr>"
 	
 	if (a_Thread) then
-		res = res .. '\n\t<tr><td colspan="2" style="padding: 2px; border: 1px solid black; background-color: #F57900">Call Stack</td></tr>'
-		res = res .. '\n\t<tr><td style="text-align: center; border: 1px solid black; background-color: #eeeeec">#</td><td style="padding: 2px; border: 1px solid black; background-color: #eeeeec">Function</td></tr>'
+		res = res .. '\n\t<tr><td colspan="3" style="padding: 2px; border: 1px solid black; background-color: #F57900">Call Stack</td></tr>'
+		res = res .. '\n\t<tr><td style="text-align: center;" bgcolor="#EEEEEC">#</td><td bgcolor="#EEEEEC" >Function</td><td bgcolor="#EEEEEC">Location</td></tr>'
 		local Stack = debug.traceback(a_Thread)
 		local Errors = StringSplit(Stack, "\n")
 		
 		table.remove(Errors, 1) -- First line is "stack traceback:"
+		local NumItems = #Errors
 		
-		for I, line in ipairs(Errors) do
+		local stacks = ''
+		for I = NumItems, 1, -1 do
+			local line = Errors[I]
 			while (line:find("\t") ~= nil) do
 				line = line:gsub("\t", "")
 			end
 			
-			line = line:gsub("%[.-%]", function(a_Str) return '' end):gsub(":%d+: ", "")
+			line = line:gsub("%[.+%]", "")
+			
+			local ErrPos = 0
+			line = line:gsub(":.+%: ", 
+				function(a_Str)
+					ErrPos = a_Str:sub(2, -3)
+					return ""
+				end
+			)
+			
 			line = line:ucfirst()
-			res = res .. '\n\t<tr><td style="text-align: center; border: 1px solid black; background-color: #eeeeec">' .. I .. '</td>'
-			res = res .. '\n\t<td style="padding: 2px; border: 1px solid black; background-color: #eeeeec">' .. line .. '</td></tr>'
+			stacks = '\n\t<td bgcolor="#EEEEEC" border="1">' .. ErrPos .. '</td></tr>' .. stacks
+			stacks = '\n\t<td bgcolor="#EEEEEC" border="1">' .. line .. '</td>' .. stacks
+			stacks = '\n\t<tr><td bgcolor="#EEEEEC" border="1">' .. I .. '</td>' .. stacks
 		end
+		
+		res = res .. stacks
 	end
 	
 	res = res .. '\n</table>'
