@@ -34,19 +34,34 @@ end
 
 
 
+function string.strip(a_String)
+	while (a_String:sub(1, 1) == " ") do
+		a_String = a_String:sub(2, -1)
+	end
+	
+	while (a_String:sub(-1, -1) == " ") do
+		a_String = a_String:sub(1, -2)
+	end
+	
+	return a_String
+end
+
+
+
 function ComposeHTMLError(a_Err, a_Thread)
 	local res = '\n<table border="1" >\n\t<tr><td colspan="3" style="padding: 2px; background-color: #DF0101; border: 1px solid black;">'
 	a_Err = a_Err:gsub("%[.+%]", "")
 	local ErrPos = 0
 	
-	a_Err = a_Err:gsub(":.+%: ", 
+	a_Err = a_Err:gsub(":.+%:", 
 		function(a_Str)
-			ErrPos = a_Str:sub(2, -3)
+			ErrPos = a_Str:sub(2, -2)
 			return ""
 		end
 	)
 	
-	a_Err = a_Err .. " at line " .. ErrPos
+	a_Err = a_Err .. " on line " .. ErrPos
+	a_Err = a_Err:strip()
 	a_Err = a_Err:ucfirst()
 	
 	res = res .. a_Err .. "</td></tr>"
@@ -70,9 +85,9 @@ function ComposeHTMLError(a_Err, a_Thread)
 			line = line:gsub("%[.+%]", "")
 			
 			local ErrPos = 0
-			line = line:gsub(":.+%: ", 
+			line = line:gsub(":.+%:", 
 				function(a_Str)
-					ErrPos = a_Str:sub(2, -3)
+					ErrPos = a_Str:sub(2, -2)
 					return ""
 				end
 			)
@@ -80,7 +95,7 @@ function ComposeHTMLError(a_Err, a_Thread)
 			line = line:ucfirst()
 			stacks = '\n\t<td bgcolor="#EEEEEC" border="1">' .. ErrPos .. '</td></tr>' .. stacks
 			stacks = '\n\t<td bgcolor="#EEEEEC" border="1">' .. line .. '</td>' .. stacks
-			stacks = '\n\t<tr><td bgcolor="#EEEEEC" border="1">' .. I .. '</td>' .. stacks
+			stacks = '\n\t<tr><td align="center" bgcolor="#EEEEEC" border="1">' .. I .. '</td>' .. stacks
 		end
 		
 		res = res .. stacks
